@@ -1,0 +1,42 @@
+import numpy as np
+
+def temperature_membership(temp):
+    low = max(0, min(1, (25 - temp) / 25))  # Low temperature (0 to 25°C)
+    medium = max(0, min(1, (temp - 15) / 10, (30 - temp) / 10))  # Medium (15 to 30°C)
+    high = max(0, min(1, (temp - 25) / 15))  # High temperature (25°C and above)
+    return low, medium, high
+
+def humidity_membership(humidity):
+    low = max(0, min(1, (50 - humidity) / 50))  # Low humidity (0 to 50%)
+    high = max(0, min(1, (humidity - 50) / 50))  # High humidity (50% and above)
+    return low, high
+
+def fan_speed_membership(fan_speed):
+    low = max(0, min(1, (50 - fan_speed) / 50))  # Low fan speed (0 to 50%)
+    high = max(0, min(1, (fan_speed - 50) / 50))  # High fan speed (50% and above)
+    return low, high
+
+def fuzzy_inference(temp, humidity):
+    # Get fuzzy membership values for temperature and humidity
+    low_temp, medium_temp, high_temp = temperature_membership(temp)
+    low_hum, high_hum = humidity_membership(humidity)
+
+    If temperature is low and humidity is low, fan speed is low
+    rule1 = min(low_temp, low_hum)
+    If temperature is high and humidity is high, fan speed is high
+    rule2 = min(high_temp, high_hum)
+
+    fan_low_value = rule1 * fan_speed_membership(0)[0] + rule2 * fan_speed_membership(50)[0]
+    fan_high_value = rule1 * fan_speed_membership(50)[1] + rule2 * fan_speed_membership(100)[1]
+
+    numerator = fan_low_value * 25 + fan_high_value * 75
+    denominator = fan_low_value + fan_high_value
+    if denominator == 0:
+        return 0  # Avoid division by zero if no rules are triggered
+    return numerator / denominator
+
+temp_input = 28  # Example: temperature = 28°C
+humidity_input = 60  # Example: humidity = 60%
+
+fan_speed_output = fuzzy_inference(temp_input, humidity_input)
+print(f"Fan Speed Output (Crisp Value): {fan_speed_output:.2f}%")
